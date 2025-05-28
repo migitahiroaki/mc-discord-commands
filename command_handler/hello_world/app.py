@@ -1,42 +1,57 @@
 import json
+from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
+from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools.logging import Logger
+from aws_lambda_powertools.utilities.data_classes import (
+    APIGatewayProxyEventV2,
+    event_source,
+)
 
-# import requests
+logger = Logger(service="hello")
+
+app = APIGatewayHttpResolver()
 
 
-def lambda_handler(event, context):
+@app.post("/start")
+def start():
+    logger.info("start called")
+    return {
+        "statusCode": 200,
+        "body": json.dumps(
+            {
+                "message": "start!",
+            }
+        ),
+    }
+
+
+@app.post("/stop")
+def start():
+    logger.info("stop called")
+    return {
+        "statusCode": 200,
+        "body": json.dumps(
+            {
+                "message": "stop!",
+            }
+        ),
+    }
+
+
+@event_source(data_class=APIGatewayProxyEventV2)
+def lambda_handler(event: APIGatewayProxyEventV2, context: LambdaContext):
     """Sample pure Lambda function
 
     Parameters
     ----------
-    event: dict, required
-        API Gateway Lambda Proxy Input Format
-
-        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
-
-    context: object, required
-        Lambda Context runtime methods and attributes
-
-        Context doc: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
+    event: HTTP API Proxy Event
+    context: Lambda Context runtime methods and attributes
 
     Returns
     ------
-    API Gateway Lambda Proxy Output Format: dict
+    HTTP API Proxy Response
 
-        Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
     """
 
-    # try:
-    #     ip = requests.get("http://checkip.amazonaws.com/")
-    # except requests.RequestException as e:
-    #     # Send some context about this error to Lambda Logs
-    #     print(e)
-
-    #     raise e
-
-    return {
-        "statusCode": 200,
-        "body": json.dumps({
-            "message": "hello world",
-            # "location": ip.text.replace("\n", "")
-        }),
-    }
+    logger.info(event)
+    return app.resolve(event, context)
