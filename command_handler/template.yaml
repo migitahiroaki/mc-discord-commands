@@ -1,7 +1,14 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: |
-  command_handler
+
+Parameters:
+  # DiscordToken:
+  #   Description: Discord Token. Must be prefixed with 'Bot' or 'Bearer'.
+  #   NoEcho: true
+  #   Type: String
+  AppPublicKey:
+    Description: Discord Application Public Key
+    Type: String
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -18,11 +25,14 @@ Resources:
   CommandHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: hello_world/
+      CodeUri: src/
       Handler: app.lambda_handler
       Runtime: python3.13
       Architectures:
         - x86_64
+      Environment:
+        Variables:
+          APP_PUBLIC_KEY: !Ref AppPublicKey
       Layers:
         - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:15
       Events:
