@@ -11,9 +11,11 @@ from aws_lambda_powertools.utilities.data_classes import (
 from aws_lambda_powertools.event_handler.content_types import APPLICATION_JSON
 from nacl.signing import VerifyKey
 from nacl.exceptions import BadSignatureError
+from interactions.models.discord.application import Application
 
 from exception.bad_request import BadRequest
 from model.api_proxy_response import ApiProxyResponse
+
 
 # token = environ["APP_BOT_TOKEN"]
 verify_key = VerifyKey(bytes.fromhex(environ["APP_PUBLIC_KEY"]))
@@ -46,7 +48,7 @@ app = APIGatewayHttpResolver()
 def handle_bad_request(e: BadRequest):
     logger.exception(e)
     return Response(
-        statusCode=400,
+        status_code=400,
         content_type=APPLICATION_JSON,
         body=json.dumps({"message": "Bad Request"}),
         headers={},
@@ -59,7 +61,7 @@ def handle_bad_request(e: BadRequest):
 def handle_bad_request(e: Exception):
     logger.exception(e)
     return Response(
-        statusCode=500,
+        status_code=500,
         content_type=APPLICATION_JSON,
         body=json.dumps({"message": "Bad Request"}),
         headers={},
@@ -74,7 +76,7 @@ def start() -> ApiProxyResponse:
     verify(event.headers, event.body)
     logger.info("start called")
     return ApiProxyResponse(
-        statusCode=200,
+        status_code=200,
         content_type=APPLICATION_JSON,
         body=json.dumps({"message": "start!"}),
         headers={},
@@ -89,7 +91,7 @@ def stop() -> ApiProxyResponse:
     verify(event.headers, event.body)
     logger.info("stop called")
     return ApiProxyResponse(
-        statusCode=200,
+        status_code=200,
         content_type=APPLICATION_JSON,
         body=json.dumps({"message": "stop!"}),
         headers={},
@@ -107,7 +109,7 @@ def root() -> ApiProxyResponse:
     if req["type"] == 0:  # InteractionType.Ping
         # Pong
         return ApiProxyResponse(
-            statusCode=204,
+            status_code=204,
             content_type=APPLICATION_JSON,
             headers={},
             body="",

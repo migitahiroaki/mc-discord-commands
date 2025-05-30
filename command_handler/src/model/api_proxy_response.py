@@ -2,7 +2,7 @@ from typing import NotRequired, TypedDict
 
 
 class ApiProxyResponse(TypedDict):
-    statusCode: int
+    status_code: int
     content_type: str
     headers: dict[str, str]
     body: str
