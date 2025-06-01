@@ -1,6 +1,5 @@
 from os import environ
 from typing import Any
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.logging import Logger
 from nacl.signing import VerifyKey
 
@@ -24,7 +23,7 @@ logger = Logger(service="hello")
 
 @discord_command
 def lambda_handler(
-    event: dict[str, Any], context: LambdaContext
+    event: dict[str, Any], context: dict[str, Any]
 ) -> DiscordInteractionResponse:
     """Sample pure Lambda function
 
@@ -45,8 +44,7 @@ def lambda_handler(
         body: InteractionRequestBody = get_verified(
             event, verify_key, InteractionRequestBody
         )
-        data: InteractionCommandData = body.data
-        interaction_type = data.type
+        interaction_type = body.type
 
         if interaction_type == InteractionType.PING:
             # Pong
@@ -57,7 +55,10 @@ def lambda_handler(
             )
 
         elif interaction_type == InteractionType.APPLICATION_COMMAND:
-            logger.info(data.name)
+            command_data: InteractionCommandData | None = body.data
+            if not command_data:
+                raise BadRequest("Command data is missing")
+            logger.info(command_data)
             return DiscordInteractionResponse(
                 body=InteractionResponseBody(
                     type=InteractionCallbackType.CHANNEL_MESSAGE_WITH_SOURCE,

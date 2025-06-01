@@ -84,7 +84,7 @@ def test_deserialize_data_positive():
 
 def test_deserialize_data_invalid():
     json_text: str = json.dumps(DATA_MISSING_TYPE)
-    with pytest.raises(ValidationError) as e:
+    with pytest.raises(ValidationError):
         deserialize(json_text, InteractionCommandData)
 
 
@@ -100,7 +100,7 @@ def test_deserialize_request_positive():
 
 def test_deserialize_request_data_invalid():
     json_text: str = json.dumps(REQUEST_DATA_MISSING_TYPE)
-    with pytest.raises(ValidationError) as e:
+    with pytest.raises(ValidationError):
         deserialize(json_text, InteractionRequestBody)
 
 
@@ -137,7 +137,7 @@ def test_get_verified_missing_body():
     }
 
     # Should be wrapped in BadRequest
-    with pytest.raises(BadRequest) as e:
+    with pytest.raises(BadRequest):
         get_verified(event, verify_key, DummyModel)
 
 
@@ -148,7 +148,7 @@ def test_get_verified_missing_headers():
     }
 
     # Should be wrapped in BadRequest
-    with pytest.raises(BadRequest) as e:
+    with pytest.raises(BadRequest):
         get_verified(event, verify_key, DummyModel)
 
 
@@ -165,5 +165,5 @@ def test_get_verified_wrong_signature():
     }
 
     # Should be wrapped in BadRequest
-    with pytest.raises(BadRequest) as e:
+    with pytest.raises(BadRequest):
         get_verified(event, verify_key, DummyModel)

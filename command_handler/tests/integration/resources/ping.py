@@ -1,0 +1,41 @@
+from typing import Any, Final
+
+
+PING_BODY: Final[dict[str, Any]] = {
+    "app_permissions": "0",
+    "id": "0000000000000000000",
+    "application_id": "0000000000000000000",
+    "attachment_size_limit": 524288000,
+    "authorizing_integration_owners": {},
+    "channel": {
+        "flags": 0,
+        "guild_id": "0000000000000000000",
+        "id": "0000000000000000000",
+        "name": "dummy",
+        "nsfw": False,
+        "parent_id": "0000000000000000000",
+        "permissions": "0",
+        "position": 2,
+        "rate_limit_per_user": 0,
+        "topic": None,
+        "type": 0,
+    },
+    "entitlements": [],
+    "token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "type": 1,
+    "user": {
+        "avatar": "00000000000000000000000000000000",
+        "avatar_decoration_data": None,
+        "bot": True,
+        "clan": None,
+        "collectibles": None,
+        "discriminator": "0000",
+        "global_name": "Discord",
+        "id": "000000000000000000",
+        "primary_guild": None,
+        "public_flags": 1,
+        "system": True,
+        "username": "discord",
+    },
+    "version": 1,
+}

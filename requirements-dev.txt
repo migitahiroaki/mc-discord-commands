@@ -1,3 +1,4 @@
 pynacl
 python-dotenv
 aws_lambda_powertools
+pytest-mock

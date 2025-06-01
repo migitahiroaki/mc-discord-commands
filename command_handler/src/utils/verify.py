@@ -10,8 +10,6 @@ ModelT = TypeVar("ModelT", bound=BaseModel)
 
 
 def deserialize(json_text: str, Model: type[ModelT]) -> ModelT:
-    print(type(json_text))
-    print(json_text)
     return Model.model_validate_json(json_text)
 
 

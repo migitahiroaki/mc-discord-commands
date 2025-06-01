@@ -35,7 +35,7 @@ class InteractionRequestBody(BaseModel):
     application_id: str
     channel_id: Optional[str] = None
     guild_id: Optional[str] = None
-    data: InteractionCommandData
+    data: Optional[InteractionCommandData] = None
     type: InteractionType
 
     model_config = {"extra": "ignore"}
