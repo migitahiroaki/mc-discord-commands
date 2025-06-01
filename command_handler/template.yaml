@@ -36,17 +36,11 @@ Resources:
       Layers:
         - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:15
       Events:
-        Start:
+        webhook:
           Type: HttpApi
           Properties:
             ApiId: !Ref CommandHandlerApi
-            Path: /start
-            Method: post
-        Stop:
-          Type: HttpApi
-          Properties:
-            ApiId: !Ref CommandHandlerApi
-            Path: /stop
+            Path: /commands
             Method: post
 # Outputs:
 # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function

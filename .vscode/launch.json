@@ -3,11 +3,11 @@
     {
       "type": "aws-sam",
       "request": "direct-invoke",
-      "name": "command_handler:HelloWorldFunction (python3.13)",
+      "name": "command_handler:CommandHandlerFunction (python3.13)",
       "invokeTarget": {
         "target": "template",
         "templatePath": "${workspaceFolder}/command_handler/template.yaml",
-        "logicalId": "HelloWorldFunction"
+        "logicalId": "CommandHandlerFunction"
       },
       "lambda": {
         "payload": {},

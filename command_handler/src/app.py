@@ -1,127 +1,51 @@
-import json
 from os import environ
 from typing import Any
-from aws_lambda_powertools.event_handler import APIGatewayHttpResolver, Response
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.logging import Logger
-from aws_lambda_powertools.utilities.data_classes import (
-    APIGatewayProxyEventV2,
-    event_source,
-)
-from aws_lambda_powertools.event_handler.content_types import APPLICATION_JSON
 from nacl.signing import VerifyKey
-from nacl.exceptions import BadSignatureError
-from interactions.models.discord.application import Application
-
-from exception.bad_request import BadRequest
-from model.api_proxy_response import ApiProxyResponse
 
 
-# token = environ["APP_BOT_TOKEN"]
+from utils.decorator import discord_command
+from typedefs.enums import InteractionCallbackType, InteractionType
+from typedefs.models import (
+    DiscordInteractionResponse,
+    InteractionCommandData,
+    InteractionResponseBody,
+    InteractionCallbackData,
+    InteractionRequestBody,
+)
+from typedefs.exceptions import BadRequest
+from utils.verify import get_verified
+
+
+# Usually cached by Lambda
+# EventHandler = Callable[[APIGatewayProxyEventV2, LambdaContext], dict[str, Any]]
+# http_event_source = cast(Callable[[EventHandler], EventHandler], event_source)
 verify_key = VerifyKey(bytes.fromhex(environ["APP_PUBLIC_KEY"]))
-
-
-"""
-verify request
-
-
-Raises:
-    BadSignatureError
-"""
-
-
-def verify(headers: dict[str, str], body: str | None) -> None:
-    try:
-        signature = headers.get("x-signature-ed25519")
-        timestamp = headers.get("x-signature-timestamp")
-        verify_key.verify(f"{timestamp}{body}".encode(), bytes.fromhex(signature))
-    except (TypeError, BadSignatureError) as e:
-        raise BadRequest(e)
-
-
 logger = Logger(service="hello")
 
-app = APIGatewayHttpResolver()
+
+# def verify(headers: dict[str, str], body: str | None) -> None:
+#     """
+#     verify request
+
+#     Raises:
+#         BadSignatureError
+#     """
+
+#     try:
+#         signature = headers["x-signature-ed25519"]
+#         timestamp = headers["x-signature-timestamp"]
+#         verify_key.verify(f"{timestamp}{body or ""}".encode(), bytes.fromhex(signature))
+#     except (KeyError, ValueError, TypeError, BadSignatureError) as e:
+#         raise BadRequest(e)
 
 
-@app.exception_handler(BadRequest)
-def handle_bad_request(e: BadRequest):
-    logger.exception(e)
-    return Response(
-        status_code=400,
-        content_type=APPLICATION_JSON,
-        body=json.dumps({"message": "Bad Request"}),
-        headers={},
-        cookies=[],
-        isBase64Encoded=False,
-    )
-
-
-@app.exception_handler(Exception)
-def handle_bad_request(e: Exception):
-    logger.exception(e)
-    return Response(
-        status_code=500,
-        content_type=APPLICATION_JSON,
-        body=json.dumps({"message": "Bad Request"}),
-        headers={},
-        cookies=[],
-        isBase64Encoded=False,
-    )
-
-
-@app.post("/start")
-def start() -> ApiProxyResponse:
-    event: APIGatewayProxyEventV2 = app.current_event
-    verify(event.headers, event.body)
-    logger.info("start called")
-    return ApiProxyResponse(
-        status_code=200,
-        content_type=APPLICATION_JSON,
-        body=json.dumps({"message": "start!"}),
-        headers={},
-        cookies=[],
-        isBase64Encoded=False,
-    )
-
-
-@app.post("/stop")
-def stop() -> ApiProxyResponse:
-    event: APIGatewayProxyEventV2 = app.current_event
-    verify(event.headers, event.body)
-    logger.info("stop called")
-    return ApiProxyResponse(
-        status_code=200,
-        content_type=APPLICATION_JSON,
-        body=json.dumps({"message": "stop!"}),
-        headers={},
-        cookies=[],
-        isBase64Encoded=False,
-    )
-
-
-@app.post("/")
-def root() -> ApiProxyResponse:
-    logger.info("root")
-    event: APIGatewayProxyEventV2 = app.current_event
-    verify(event.headers, event.body)
-    req: dict = json.loads(event.body)
-    if req["type"] == 0:  # InteractionType.Ping
-        # Pong
-        return ApiProxyResponse(
-            status_code=204,
-            content_type=APPLICATION_JSON,
-            headers={},
-            body="",
-            isBase64Encoded=False,
-            cookies=[],
-        )
-    else:
-        raise BadRequest
-
-
-# @event_source(data_class=APIGatewayProxyEventV2)
-def lambda_handler(event: dict[str, Any], context: LambdaContext) -> ApiProxyResponse:
+# @http_event_source
+@discord_command
+def lambda_handler(
+    event: dict[str, Any], context: LambdaContext
+) -> DiscordInteractionResponse:
     """Sample pure Lambda function
 
     Parameters
@@ -135,9 +59,62 @@ def lambda_handler(event: dict[str, Any], context: LambdaContext) -> ApiProxyRes
 
     """
 
-    logger.info(event)
+    try:
+
+        logger.info(event)
+        # verify(event.headers, event.body)
+        body: InteractionRequestBody = get_verified(
+            event, verify_key, InteractionRequestBody
+        )
+        data: InteractionCommandData = body.data
+        interaction_type = data.type
+
+        if interaction_type == InteractionType.PING:
+            # Pong
+            return DiscordInteractionResponse(
+                body=InteractionResponseBody(
+                    type=InteractionCallbackType.PONG,
+                )
+            )
+
+        elif interaction_type == InteractionType.APPLICATION_COMMAND:
+            logger.info(data.name)
+            return DiscordInteractionResponse(
+                body=InteractionResponseBody(
+                    type=InteractionCallbackType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data=InteractionCallbackData(content="Command accepted!"),
+                )
+            )
+
+        else:
+            raise BadRequest(f"Unsupported interaction type: {interaction_type}")
+
+    except BadRequest as e:
+        # Log as warning. Do not give reason to the client.
+        logger.warning(e)
+        return DiscordInteractionResponse(
+            statusCode=400,
+            body=InteractionResponseBody(
+                type=InteractionCallbackType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data=InteractionCallbackData(
+                    content="Bad Request. For security reasons, the reason is not given.",
+                ),
+            ),
+        )
+
+    except Exception as e:
+        # Log as error. Do not give reason to the client.
+        logger.error(e)
+        return DiscordInteractionResponse(
+            statusCode=500,
+            body=InteractionResponseBody(
+                type=InteractionCallbackType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data=InteractionCallbackData(
+                    content="Technical error. Please contact author.",
+                ),
+            ),
+        )
+
     # API Gateway has weird case conversion, so we need to make them lowercase.
     # See https://github.com/aws/aws-sam-cli/issues/1860
     # headers: dict = {k.lower(): v for k, v in event["headers"].items()}
-
-    return app.resolve(event, context)
