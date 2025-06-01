@@ -18,30 +18,10 @@ from typedefs.exceptions import BadRequest
 from utils.verify import get_verified
 
 
-# Usually cached by Lambda
-# EventHandler = Callable[[APIGatewayProxyEventV2, LambdaContext], dict[str, Any]]
-# http_event_source = cast(Callable[[EventHandler], EventHandler], event_source)
 verify_key = VerifyKey(bytes.fromhex(environ["APP_PUBLIC_KEY"]))
 logger = Logger(service="hello")
 
 
-# def verify(headers: dict[str, str], body: str | None) -> None:
-#     """
-#     verify request
-
-#     Raises:
-#         BadSignatureError
-#     """
-
-#     try:
-#         signature = headers["x-signature-ed25519"]
-#         timestamp = headers["x-signature-timestamp"]
-#         verify_key.verify(f"{timestamp}{body or ""}".encode(), bytes.fromhex(signature))
-#     except (KeyError, ValueError, TypeError, BadSignatureError) as e:
-#         raise BadRequest(e)
-
-
-# @http_event_source
 @discord_command
 def lambda_handler(
     event: dict[str, Any], context: LambdaContext
@@ -62,7 +42,6 @@ def lambda_handler(
     try:
 
         logger.info(event)
-        # verify(event.headers, event.body)
         body: InteractionRequestBody = get_verified(
             event, verify_key, InteractionRequestBody
         )

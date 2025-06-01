@@ -1,7 +1,12 @@
 from typing import Literal, Optional, TypeVar, Generic
 from aws_lambda_powertools.event_handler.content_types import APPLICATION_JSON
 from pydantic import BaseModel
-from typedefs.enums import InteractionCallbackType
+from typedefs.enums import (
+    CommandOptionType,
+    InteractionCallbackType,
+    InteractionCommandType,
+    InteractionType,
+)
 
 BodyT = TypeVar("BodyT", bound=BaseModel)
 
@@ -9,11 +14,18 @@ BodyT = TypeVar("BodyT", bound=BaseModel)
 # for Request
 
 
+class CommandOptions(BaseModel):
+    name: str
+    type: CommandOptionType
+    value: str
+    model_config = {"extra": "ignore"}
+
+
 class InteractionCommandData(BaseModel):
     name: str
     id: str
-    type: int
-    options: Optional[list[dict[str, str]]]
+    options: Optional[list[CommandOptions]]
+    type: InteractionCommandType
 
     model_config = {"extra": "ignore"}
 
@@ -24,6 +36,7 @@ class InteractionRequestBody(BaseModel):
     channel_id: Optional[str] = None
     guild_id: Optional[str] = None
     data: InteractionCommandData
+    type: InteractionType
 
     model_config = {"extra": "ignore"}
 
