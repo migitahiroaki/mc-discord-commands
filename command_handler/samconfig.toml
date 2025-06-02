@@ -1,7 +1,7 @@
 version = 0.1
 
 [default.global.parameters]
-stack_name = "HelloWorld"
+stack_name = "CommandHandlerApi"
 region = "us-east-1"
 
 [default.build.parameters]
@@ -12,16 +12,20 @@ parallel = true
 lint = true
 
 [default.deploy.parameters]
-capabilities = "CAPABILITY_IAM"
+capabilities = ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM"]
 confirm_changeset = true
 resolve_s3 = true
 
+[default.deploy.parameters.parameter_overrides]
+# replace with your key.
+AppPublicKey = "201603e36d086b88ba355136c2296d44d3e58f4109f0c4baeead568cbf380d46"
 [default.package.parameters]
 resolve_s3 = true
 
 [default.sync.parameters]
 watch = true
-template_file = "/home/hiro/mc-discord-commands/command_handler/template.yaml"
+# absolute path is recommended
+template_file = "command_handler/template.yaml"
 dependency_layer = false
 
 [default.local_start_api.parameters]
