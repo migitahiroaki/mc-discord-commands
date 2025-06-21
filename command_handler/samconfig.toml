@@ -18,7 +18,7 @@ resolve_s3 = true
 
 [default.deploy.parameters.parameter_overrides]
 # replace with your key.
-AppPublicKey = "201603e36d086b88ba355136c2296d44d3e58f4109f0c4baeead568cbf380d46"
+AppPublicKey = "18cebf18747fcab70c92741fd0e6716fd74b414fac0e72bbaf3e63e8d00037d5"
 [default.package.parameters]
 resolve_s3 = true
 

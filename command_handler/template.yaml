@@ -2,10 +2,18 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 
 Parameters:
-  # DiscordToken:
-  #   Description: Discord Token. Must be prefixed with 'Bot' or 'Bearer'.
-  #   NoEcho: true
-  #   Type: String
+  LogLevel:
+    Description: Log level for command_handler
+    Type: String
+
+  ServerInstanceId:
+    Description: EC2 instance ID
+    Type: String
+
+  ServerRegionName:
+    Description: EC2 region name
+    Type: String
+
   AppPublicKey:
     Description: Discord Application Public Key
     Type: String
@@ -25,6 +33,7 @@ Resources:
   CommandHandlerFunction:
     Type: AWS::Serverless::Function
     Properties:
+      MemorySize: 1024
       CodeUri: src/
       Handler: app.lambda_handler
       Runtime: python3.13
@@ -33,8 +42,22 @@ Resources:
       Environment:
         Variables:
           APP_PUBLIC_KEY: !Ref AppPublicKey
-      Layers:
-        - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:15
+          LOG_LEVEL: !Ref LogLevel
+          SERVER_INSTANCE_ID: !Ref ServerInstanceId
+          SERVER_REGION_NAME: !Ref ServerRegionName
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - ec2:DescribeInstances
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - ec2:StartInstances
+                - ec2:StopInstances
+              Resource: !Sub arn:aws:ec2:${ServerRegionName}:${AWS::AccountId}:instance/${ServerInstanceId}
+
       Events:
         webhook:
           Type: HttpApi

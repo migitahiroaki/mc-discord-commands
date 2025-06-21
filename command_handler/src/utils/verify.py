@@ -1,12 +1,13 @@
 from typing import Any, TypeVar
-from venv import logger
 from nacl.signing import VerifyKey
 from nacl.exceptions import BadSignatureError
 from pydantic import BaseModel, ValidationError
+from logging import getLogger
 
 from typedefs.exceptions import BadRequest
 
 ModelT = TypeVar("ModelT", bound=BaseModel)
+logger = getLogger(__name__)
 
 
 def deserialize(json_text: str, Model: type[ModelT]) -> ModelT:
@@ -23,7 +24,7 @@ def get_verified(
         if not headers:
             raise BadRequest("Request headers are missing")
 
-        body: str | None = event["body"]
+        body: str | None = event.get("body")
         if not body:
             raise BadRequest("Request body is missing")
 

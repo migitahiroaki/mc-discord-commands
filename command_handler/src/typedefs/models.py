@@ -1,5 +1,4 @@
 from typing import Literal, Optional, TypeVar, Generic
-from aws_lambda_powertools.event_handler.content_types import APPLICATION_JSON
 from pydantic import BaseModel
 from typedefs.enums import (
     CommandOptionType,
@@ -68,7 +67,7 @@ class InteractionResponseBody(BaseModel):
 
 class ApiProxyResponse(BaseModel, Generic[BodyT]):
     statusCode: int = 200
-    headers: dict[str, str] = {"Content-Type": APPLICATION_JSON}
+    headers: dict[str, str] = {"Content-Type": "application/json"}
     body: Optional[BodyT] = None
 
     def to_dict(self) -> dict[str, str | int | bool]:

@@ -1,12 +1,13 @@
 from functools import wraps
 from typing import Any, Callable, TypeVar, ParamSpec
+
 from typedefs.models import ApiProxyResponse
-from aws_lambda_powertools.logging import Logger
+from logging import getLogger
 
 P = ParamSpec("P")
 R = TypeVar("R", bound=ApiProxyResponse[Any])
 
-logger = Logger(child=True)
+logger = getLogger(__name__)
 
 
 def discord_command(

@@ -1,4 +1,4 @@
 class BadRequest(Exception):
-    """クライアントの不正なリクエストを表すカスタム例外。"""
+    """Custom exception for bad requests (client side)."""
 
     pass

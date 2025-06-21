@@ -8,8 +8,9 @@ import json
 import sys
 
 DISCORD_BOT_TOKEN = environ["DISCORD_BOT_TOKEN"]
+GUILD_ID = environ["GUILD_ID"]
 APPLICATION_ID = environ["APPLICATION_ID"]
-base_url = f"https://discord.com/api/v10/applications/{APPLICATION_ID}/commands"
+base_url = f"https://discord.com/api/v10/applications/{APPLICATION_ID}/guilds/{GUILD_ID}/commands"
 headers = {
     "Authorization": f"Bot {DISCORD_BOT_TOKEN}",
     "Content-Type": "application/json",
@@ -51,7 +52,6 @@ def register_command() -> requests.Response:
     return requests.post(base_url, headers=headers, data=json.dumps(commands))
 
 
-# Not implemented for global command.
 # @typechecked
 # def update_command(command_id: str) -> requests.Response:
 #     return requests.put(
@@ -88,7 +88,7 @@ def main():
         execute(get_command, command_id)
     elif command == "register":
         execute(register_command)
-    # Not implemented for global command. Use register instead.
+    # Not implemented for guild command. Use register instead.
     # elif command == "update":
     #     execute(update_command, command_id)
     elif command == "delete":
